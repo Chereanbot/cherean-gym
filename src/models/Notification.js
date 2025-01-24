@@ -7,12 +7,13 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['success', 'warning', 'error', 'info'],
+    enum: ['info', 'success', 'warning', 'error'],
     default: 'info'
   },
-  date: {
-    type: Date,
-    default: Date.now
+  category: {
+    type: String,
+    enum: ['blog', 'project', 'service', 'system', 'auth', 'general'],
+    default: 'general'
   },
   read: {
     type: Boolean,
@@ -21,12 +22,25 @@ const notificationSchema = new mongoose.Schema({
   link: {
     type: String
   },
-  category: {
+  importance: {
     type: String,
-    enum: ['blog', 'project', 'service', 'experience', 'education', 'system'],
-    default: 'system'
+    enum: ['low', 'medium', 'high'],
+    default: 'low'
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed
+  },
+  expiresAt: {
+    type: Date
   }
+}, {
+  timestamps: true
 })
+
+// Index for efficient querying
+notificationSchema.index({ read: 1, createdAt: -1 })
+notificationSchema.index({ category: 1, createdAt: -1 })
+notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
 const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema)
 

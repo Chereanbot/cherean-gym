@@ -50,28 +50,15 @@ export default function AdminLayout({ children }) {
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     try {
-      const response = await fetch('/api/notifications')
+      const response = await fetch('/api/notifications/get')
       const data = await response.json()
       
       if (data.success) {
-        const formattedNotifications = data.notifications.map(notification => ({
-          id: notification._id,
-          type: notification.category,
-          title: getNotificationTitle(notification),
-          message: notification.message,
-          time: formatNotificationDate(notification.date),
-          read: notification.read,
-          link: notification.link || getDefaultLink(notification),
-          actionLabel: getActionLabel(notification)
-        }))
-        
-        setRecentNotifications(formattedNotifications)
-        setUnreadCount(formattedNotifications.filter(n => !n.read).length)
+        setRecentNotifications(data.data)
+        setUnreadCount(data.data.filter(n => !n.read).length)
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 

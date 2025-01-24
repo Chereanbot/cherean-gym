@@ -62,6 +62,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link 
+          rel="stylesheet" 
+          href="https://unpkg.com/react-quill@2.0.0/dist/quill.snow.css" 
+        />
         <Script
           id="structured-data"
           type="application/ld+json"

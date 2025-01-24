@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import connectToDB from '@/database'
-import mongoose from 'mongoose'
-
-const Contact = mongoose.models.Contact
+import Contact from '@/models/Contact'
 
 // GET /api/contact/messages - Get all contact messages
 export async function GET(request) {
@@ -29,7 +27,7 @@ export async function GET(request) {
     
     // Get messages with pagination and sorting
     const messages = await Contact.find(query)
-      .sort({ date: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
     

@@ -13,6 +13,7 @@ const nextConfig = {
             },
         ],
     },
+    transpilePackages: ['react-quill']
 };
 
 export default nextConfig;
