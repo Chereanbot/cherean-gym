@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/database";
+import connectToDB from "@/database";
 import Blog from "@/models/Blog";
 import Project from "@/models/Project";
 import Service from "@/models/Service";
@@ -12,96 +12,62 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectDB();
-        
-        // Get dashboard settings or create default if not exists
-        let settings = await DashboardSettings.findOne();
-        if (!settings) {
-            settings = await DashboardSettings.create({});
-        }
-        
-        // Fetch all stats in parallel for better performance
+        await connectToDB();
+
+        // Get counts from all collections
         const [
-            blogStats,
-            projectStats,
+            blogCount,
+            projectCount,
             serviceCount,
             experienceCount,
             educationCount,
-            contactCount
+            contactCount,
+            settings
         ] = await Promise.all([
-            // Blog stats with published/draft counts
-            Promise.all([
-                Blog.countDocuments(),
-                Blog.countDocuments({ status: 'published' }),
-                Blog.countDocuments({ status: 'draft' })
-            ]),
-            
-            // Project stats with active/completed counts
-            Promise.all([
-                Project.countDocuments(),
-                Project.countDocuments({ status: 'active' }),
-                Project.countDocuments({ status: 'completed' })
-            ]),
-            
-            // Simple counts for other collections
+            Blog.countDocuments(),
+            Project.countDocuments(),
             Service.countDocuments(),
             Experience.countDocuments(),
             Education.countDocuments(),
-            Contact.countDocuments()
+            Contact.countDocuments(),
+            DashboardSettings.findOne()
         ]);
 
-        const [blogTotal, blogPublished, blogDraft] = blogStats;
-        const [projectTotal, projectActive, projectCompleted] = projectStats;
+        // Get recent items
+        const [
+            recentBlogs,
+            recentProjects,
+            recentMessages
+        ] = await Promise.all([
+            Blog.find().sort({ createdAt: -1 }).limit(5),
+            Project.find().sort({ createdAt: -1 }).limit(5),
+            Contact.find().sort({ createdAt: -1 }).limit(5)
+        ]);
 
         return NextResponse.json({
             success: true,
             data: {
-                blogs: {
-                    total: blogTotal,
-                    published: blogPublished,
-                    draft: blogDraft,
-                    visible: settings.widgets.blogs.visible,
-                    order: settings.widgets.blogs.order
+                counts: {
+                    blogs: blogCount,
+                    projects: projectCount,
+                    services: serviceCount,
+                    experience: experienceCount,
+                    education: educationCount,
+                    messages: contactCount
                 },
-                projects: {
-                    total: projectTotal,
-                    active: projectActive,
-                    completed: projectCompleted,
-                    visible: settings.widgets.projects.visible,
-                    order: settings.widgets.projects.order
+                recent: {
+                    blogs: recentBlogs,
+                    projects: recentProjects,
+                    messages: recentMessages
                 },
-                services: {
-                    total: serviceCount,
-                    visible: settings.widgets.services.visible,
-                    order: settings.widgets.services.order
-                },
-                experience: {
-                    total: experienceCount,
-                    visible: settings.widgets.experience.visible,
-                    order: settings.widgets.experience.order
-                },
-                education: {
-                    total: educationCount,
-                    visible: settings.widgets.education.visible,
-                    order: settings.widgets.education.order
-                },
-                messages: {
-                    total: contactCount,
-                    unread: contactCount,
-                    visible: settings.widgets.messages.visible,
-                    order: settings.widgets.messages.order
-                },
-                quickActions: settings.quickActions
+                settings: settings || {}
             }
         });
     } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        return NextResponse.json(
-            {
-                success: false,
-                error: 'Failed to fetch dashboard statistics'
-            },
-            { status: 500 }
-        );
+        console.error("Error fetching admin stats:", error);
+        return NextResponse.json({
+            success: false,
+            message: "Error fetching admin stats"
+        }, { status: 500 });
     }
 } 

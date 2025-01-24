@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+const model = genAI.getGenerativeModel({ model: "gemini-pro" })
 
 export async function POST(request) {
   try {
@@ -57,23 +56,9 @@ Current Summary: ${personalInfo.summary || 'None provided'}
 
 The summary should be concise, highlight key strengths, and be written in first person.`
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: "You are a professional CV writer who creates compelling and concise content."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 200
-  })
-
-  return response.choices[0].message.content.trim()
+  const result = await model.generateContent(prompt)
+  const response = await result.response
+  return response.text().trim()
 }
 
 async function enhanceDescription(experience) {
@@ -85,23 +70,9 @@ Current Description: ${experience.description || 'None provided'}
 
 Format the response as 3-4 bullet points, each starting with an action verb.`
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: "You are a professional CV writer who creates impactful job descriptions."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 200
-  })
-
-  return response.choices[0].message.content.trim()
+  const result = await model.generateContent(prompt)
+  const response = await result.response
+  return response.text().trim()
 }
 
 async function enhanceProjectDescription(project) {
@@ -112,21 +83,7 @@ Current Description: ${project.description || 'None provided'}
 
 Format the response as 2-3 sentences, highlighting the problem solved, technologies used, and measurable outcomes.`
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: "You are a professional CV writer who creates compelling project descriptions."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 150
-  })
-
-  return response.choices[0].message.content.trim()
+  const result = await model.generateContent(prompt)
+  const response = await result.response
+  return response.text().trim()
 } 

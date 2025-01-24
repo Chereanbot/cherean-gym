@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectToDB from '@/database';
 import About from '@/models/About';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 
 export async function PUT(req) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-        }
-
-        await connectDB();
+        await connectToDB();
         const data = await req.json();
 
         // Find the existing about document or create a new one
@@ -42,7 +35,7 @@ export async function PUT(req) {
 
 export async function GET() {
     try {
-        await connectDB();
+        await connectToDB();
         const about = await About.findOne();
         
         return NextResponse.json({

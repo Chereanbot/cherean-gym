@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/database";
+import connectToDB from "@/database";
 import Blog from "@/models/Blog";
 import Project from "@/models/Project";
 import Service from "@/models/Service";
@@ -9,134 +9,112 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
     try {
-        await connectDB();
         const { searchParams } = new URL(request.url);
-        
-        // Parse query parameters
-        const query = searchParams.get('q') || '';
-        const types = searchParams.get('types')?.split(',') || ['blogs', 'projects', 'services', 'messages'];
-        const limit = parseInt(searchParams.get('limit')) || 5;
+        const query = searchParams.get('q');
+        const type = searchParams.get('type');
 
-        const results = { total: 0, items: [] };
+        if (!query) {
+            return NextResponse.json({
+                success: false,
+                message: "Search query is required"
+            });
+        }
+
+        await connectToDB();
+
+        let results = [];
         const searchRegex = new RegExp(query, 'i');
 
-        // Parallel search across all enabled content types
-        const searchPromises = [];
-
-        if (types.includes('blogs')) {
-            searchPromises.push(
-                Blog.find({
+        switch (type) {
+            case 'blog':
+                results = await Blog.find({
                     $or: [
                         { title: searchRegex },
                         { content: searchRegex },
                         { tags: searchRegex }
                     ]
-                })
-                .select('title status createdAt slug')
-                .limit(limit)
-                .then(items => items.map(item => ({
-                    ...item.toObject(),
-                    type: 'blog'
-                })))
-            );
-        }
-
-        if (types.includes('projects')) {
-            searchPromises.push(
-                Project.find({
+                }).limit(10);
+                break;
+            case 'project':
+                results = await Project.find({
                     $or: [
-                        { title: searchRegex },
+                        { name: searchRegex },
                         { description: searchRegex },
                         { technologies: searchRegex }
                     ]
-                })
-                .select('title status createdAt slug')
-                .limit(limit)
-                .then(items => items.map(item => ({
-                    ...item.toObject(),
-                    type: 'project'
-                })))
-            );
-        }
-
-        if (types.includes('services')) {
-            searchPromises.push(
-                Service.find({
+                }).limit(10);
+                break;
+            case 'service':
+                results = await Service.find({
                     $or: [
-                        { title: searchRegex },
+                        { name: searchRegex },
                         { description: searchRegex }
                     ]
-                })
-                .select('title createdAt slug')
-                .limit(limit)
-                .then(items => items.map(item => ({
-                    ...item.toObject(),
-                    type: 'service'
-                })))
-            );
-        }
-
-        if (types.includes('messages')) {
-            searchPromises.push(
-                Contact.find({
+                }).limit(10);
+                break;
+            case 'contact':
+                results = await Contact.find({
                     $or: [
                         { name: searchRegex },
                         { email: searchRegex },
                         { message: searchRegex }
                     ]
-                })
-                .select('name email message createdAt')
-                .limit(limit)
-                .then(items => items.map(item => ({
-                    ...item.toObject(),
-                    type: 'message',
-                    title: `Message from ${item.name}`
-                })))
-            );
+                }).limit(10);
+                break;
+            default:
+                // Search across all collections
+                const [blogs, projects, services, contacts] = await Promise.all([
+                    Blog.find({
+                        $or: [
+                            { title: searchRegex },
+                            { content: searchRegex }
+                        ]
+                    }).limit(5),
+                    Project.find({
+                        $or: [
+                            { name: searchRegex },
+                            { description: searchRegex }
+                        ]
+                    }).limit(5),
+                    Service.find({
+                        $or: [
+                            { name: searchRegex },
+                            { description: searchRegex }
+                        ]
+                    }).limit(5),
+                    Contact.find({
+                        $or: [
+                            { name: searchRegex },
+                            { email: searchRegex }
+                        ]
+                    }).limit(5)
+                ]);
+
+                results = {
+                    blogs,
+                    projects,
+                    services,
+                    contacts
+                };
         }
-
-        // Wait for all searches to complete
-        const searchResults = await Promise.all(searchPromises);
-
-        // Combine and sort results
-        results.items = searchResults
-            .flat()
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, limit);
-
-        results.total = results.items.length;
-
-        // Group results by type
-        const groupedResults = results.items.reduce((acc, item) => {
-            if (!acc[item.type]) {
-                acc[item.type] = [];
-            }
-            acc[item.type].push(item);
-            return acc;
-        }, {});
 
         return NextResponse.json({
             success: true,
-            data: {
-                query,
-                total: results.total,
-                grouped: groupedResults,
-                items: results.items
-            }
+            data: results
         });
     } catch (error) {
-        console.error('Error performing search:', error);
-        return NextResponse.json(
-            { success: false, error: 'Failed to perform search' },
-            { status: 500 }
-        );
+        console.error("Search error:", error);
+        return NextResponse.json({
+            success: false,
+            message: "Error performing search"
+        }, { status: 500 });
     }
 }
 
 // Save recent search
 export async function POST(request) {
     try {
-        await connectDB();
+        await connectToDB();
         const { query, type } = await request.json();
 
         // Here you could implement saving recent searches to user preferences

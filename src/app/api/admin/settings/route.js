@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import connectDB from '@/database';
+import connectToDB from '@/database';
 import Settings from '@/models/Settings';
 import DashboardSettings from "@/models/DashboardSettings";
 
@@ -20,7 +20,7 @@ const authenticateAdmin = async (req) => {
 export async function GET(req) {
   try {
     await authenticateAdmin(req);
-    await connectDB();
+    await connectToDB();
 
     // Get or create settings
     let settings = await Settings.findOne({});
@@ -88,13 +88,19 @@ export async function GET(req) {
       },
     };
 
-    return NextResponse.json(adminSettings, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      data: {
+        settings,
+        adminSettings
+      }
+    });
   } catch (error) {
-    console.error('Admin settings error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch admin settings' },
-      { status: error.message === 'Unauthorized access' ? 401 : 500 }
-    );
+    console.error('Error fetching admin settings:', error);
+    return NextResponse.json({
+      success: false,
+      message: error.message
+    }, { status: error.message === 'Unauthorized access' ? 401 : 500 });
   }
 }
 
@@ -102,7 +108,7 @@ export async function GET(req) {
 export async function PUT(req) {
   try {
     await authenticateAdmin(req);
-    await connectDB();
+    await connectToDB();
     
     const updates = await req.json();
 
@@ -135,7 +141,7 @@ export async function PUT(req) {
 export async function POST(req) {
   try {
     await authenticateAdmin(req);
-    await connectDB();
+    await connectToDB();
 
     // Get or create settings
     let settings = await Settings.findOne({});
@@ -166,7 +172,7 @@ export const dynamic = 'force-dynamic';
 // Get current settings
 export async function GET_DASHBOARD() {
     try {
-        await connectDB();
+        await connectToDB();
         
         let settings = await DashboardSettings.findOne();
         if (!settings) {
@@ -192,7 +198,7 @@ export async function GET_DASHBOARD() {
 // Update settings
 export async function PUT_DASHBOARD(request) {
     try {
-        await connectDB();
+        await connectToDB();
         
         const updates = await request.json();
         
