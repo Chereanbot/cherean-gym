@@ -1,37 +1,115 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Cherean Gym - Portfolio & Blog Platform
 
-## Getting Started
+A modern, full-stack portfolio and blog platform built with Next.js 14, featuring AI-powered content generation, real-time analytics, and a comprehensive admin dashboard.
 
-First, run the development server:
+## 🌟 Features
 
+- **Modern Tech Stack**: Built with Next.js 14, React, TailwindCSS, and MongoDB
+- **AI Integration**: Gemini AI for content analysis and generation
+- **Real-time Analytics**: Track visitor engagement and performance metrics
+- **Admin Dashboard**: Comprehensive management interface for all content
+- **Blog Platform**: Full-featured blog with AI-assisted content creation
+- **Portfolio Management**: Showcase projects, skills, and experiences
+- **Cloud Integration**: Cloudinary for media management
+- **Responsive Design**: Mobile-first approach with modern UI/UX
+- **SEO Optimized**: Built-in SEO best practices and optimization tools
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- MongoDB database
+- Cloudinary account
+- Google Gemini API key
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Chereanbot/cherean-gym.git
+cd cherean-gym
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
+Fill in your environment variables in the `.env` file.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Frontend**: Next.js 14, React, TailwindCSS, Framer Motion
+- **Backend**: Next.js API Routes, MongoDB
+- **AI Services**: Google Gemini AI
+- **Cloud Services**: Cloudinary, Vercel
+- **Analytics**: Custom analytics implementation
+- **Authentication**: JWT, NextAuth.js
+- **Database**: MongoDB with Mongoose
+- **Testing**: Jest, React Testing Library
+- **CI/CD**: Vercel CI/CD pipeline
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+cherean-gym/
+├── src/
+│   ├── app/              # Next.js 14 app directory
+│   ├── components/       # React components
+│   ├── models/          # MongoDB models
+│   ├── utils/           # Utility functions
+│   └── lib/             # Shared libraries
+├── public/              # Static assets
+└── ...
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔑 Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# cherean-gym
+Required environment variables:
+
+- `MONGODB_URI`: MongoDB connection string
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+- `GEMINI_API_KEY`: Google Gemini API key
+- See `.env.example` for all required variables
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [MongoDB](https://www.mongodb.com/)
+- [Cloudinary](https://cloudinary.com/)
+- [Google Gemini AI](https://deepmind.google/technologies/gemini/)
+
+## 📧 Contact
+
+For questions and support, please email [your-email@example.com](mailto:your-email@example.com)
+
+---
+Built with ❤️ by [Your Name]
