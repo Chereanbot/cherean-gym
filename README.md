@@ -1,4 +1,4 @@
-# Cherean Gym - Portfolio & Blog Platform
+# Cherinet Afewerk - Portfolio & Blog Platform
 
 A modern, full-stack portfolio and blog platform built with Next.js 14, featuring AI-powered content generation, real-time analytics, and a comprehensive admin dashboard.
 
@@ -109,7 +109,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions and support, please email [your-email@example.com](mailto:your-email@example.com)
+For questions and support, please email [cscher331@gmail.com](mailto:cscher331@gmail.com)
 
 ---
-Built with ❤️ by [Your Name]
+Built with ❤️ by [cherinet afewek]
