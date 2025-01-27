@@ -1,67 +1,83 @@
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { WebSocketServer } from 'ws'
 import connectToDB from '@/database'
 import Notification from '@/models/Notification'
 
-export const dynamic = 'force-dynamic'
+let wss = null
 
-export async function GET() {
-    const headersList = headers();
+// Initialize WebSocket server
+if (!wss) {
+  wss = new WebSocketServer({ noServer: true })
+  
+  wss.on('connection', (ws) => {
+    console.log('Client connected')
+    
+    ws.on('close', () => {
+      console.log('Client disconnected')
+    })
+  })
+}
 
-    // Set headers for SSE
-    const responseHeaders = {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-    };
+// Broadcast notification to all connected clients
+export const broadcastNotification = (notification) => {
+  if (wss) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(notification))
+      }
+    })
+  }
+}
 
-    try {
-        await connectToDB();
+// Handle WebSocket upgrade
+export function GET(req) {
+  if (req.headers.upgrade !== 'websocket') {
+    return new Response('Expected Upgrade: websocket', { status: 426 })
+  }
 
-        const encoder = new TextEncoder();
-        const stream = new ReadableStream({
-            async start(controller) {
-                const sendNotifications = async () => {
-                    try {
-                        // Get latest unread notifications
-                        const notifications = await Notification.find({ read: false })
-                            .sort({ createdAt: -1 })
-                            .limit(10);
+  wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
+    wss.emit('connection', ws, req)
+  })
+}
 
-                        const data = JSON.stringify({
-                            notifications,
-                            timestamp: new Date().toISOString()
-                        });
-
-                        // Send notifications as SSE
-                        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-                    } catch (error) {
-                        console.error('Error fetching realtime notifications:', error);
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Error fetching notifications' })}\n\n`));
-                    }
-                };
-
-                // Send initial notifications
-                await sendNotifications();
-
-                // Set up interval to send updates every 5 seconds
-                const interval = setInterval(sendNotifications, 5000);
-
-                // Clean up interval when the connection closes
-                return () => {
-                    clearInterval(interval);
-                };
-            }
-        });
-
-        return new Response(stream, {
-            headers: responseHeaders
-        });
-    } catch (error) {
-        console.error('Error in notifications realtime route:', error);
-        return NextResponse.json({
-            success: false,
-            message: 'Error setting up realtime notifications'
-        }, { status: 500 });
+// Create a new notification and broadcast it
+export async function POST(request) {
+  try {
+    await connectToDB()
+    
+    const data = await request.json()
+    
+    // Validate required fields
+    if (!data.message) {
+      return NextResponse.json({
+        success: false,
+        error: 'Message is required'
+      }, { status: 400 })
     }
+
+    // Create notification
+    const notification = await Notification.create({
+      message: data.message,
+      type: data.type || 'info',
+      category: data.category || 'general',
+      link: data.link,
+      importance: data.importance || 'low',
+      metadata: data.metadata,
+      expiresAt: data.expiresAt
+    })
+
+    // Broadcast to connected clients
+    broadcastNotification(notification)
+
+    return NextResponse.json({
+      success: true,
+      data: notification
+    })
+  } catch (error) {
+    console.error('Error creating notification:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to create notification'
+    }, { status: 500 })
+  }
 } 

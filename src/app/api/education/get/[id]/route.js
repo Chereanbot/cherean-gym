@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { connectToDB } from '@/database';
+import { connectDB } from '@/lib/database';
 import Education from '@/models/Education';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
     try {
-        await connectToDB();
+        await connectDB();
         const { id } = params;
 
         const education = await Education.findById(id);

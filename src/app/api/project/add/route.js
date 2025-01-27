@@ -1,4 +1,4 @@
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Project from "@/models/Project";
 import { NextResponse } from "next/server";
 
@@ -122,7 +122,7 @@ const validateProjectData = (data) => {
 
 export async function POST(req) {
     try {
-        await connectToDB();
+        await connectDB();
         const projectData = await req.json();
 
         // Validate the data

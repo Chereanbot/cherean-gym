@@ -9,34 +9,34 @@ const NOTIFICATION_SOUNDS = {
 };
 
 class SoundManager {
-    static instance = null;
-    audioElements = new Map();
-
     constructor() {
-        if (SoundManager.instance) {
-            return SoundManager.instance;
-        }
-        SoundManager.instance = this;
-        this.initializeSounds();
+        this.sounds = {};
+        this.isInitialized = false;
     }
 
     initializeSounds() {
-        Object.entries(NOTIFICATION_SOUNDS).forEach(([key, url]) => {
-            const audio = new Audio(url);
-            audio.preload = 'auto';
-            this.audioElements.set(key, audio);
-        });
+        // Only initialize in browser environment
+        if (typeof window !== 'undefined' && !this.isInitialized) {
+            this.sounds = {
+                notification: typeof Audio !== 'undefined' ? new Audio('/sounds/notification.mp3') : null,
+                message: typeof Audio !== 'undefined' ? new Audio('/sounds/message.mp3') : null,
+                alert: typeof Audio !== 'undefined' ? new Audio('/sounds/alert.mp3') : null
+            };
+            this.isInitialized = true;
+        }
     }
 
-    async playSound(type = 'default') {
-        try {
-            const audio = this.audioElements.get(type);
-            if (audio) {
-                audio.currentTime = 0;
-                await audio.play();
-            }
-        } catch (error) {
-            console.error('Error playing sound:', error);
+    playSound(soundName) {
+        if (!this.isInitialized) {
+            this.initializeSounds();
+        }
+
+        const sound = this.sounds[soundName];
+        if (sound && typeof window !== 'undefined') {
+            sound.currentTime = 0;
+            sound.play().catch(error => {
+                console.log('Sound playback failed:', error);
+            });
         }
     }
 

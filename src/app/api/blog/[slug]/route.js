@@ -1,4 +1,4 @@
-import connectToDB from "@/database"
+import { connectDB } from '@/lib/database'
 import Blog from "@/models/Blog"
 import { NextResponse } from "next/server"
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(req, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const blog = await Blog.findOne({ slug: params.slug })
     

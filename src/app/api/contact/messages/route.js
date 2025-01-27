@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Contact from '@/models/Contact'
 
 // GET /api/contact/messages - Get all contact messages
 export async function GET(request) {
   try {
-    await connectToDB()
+    await connectDB()
     
     // Get query parameters
     const { searchParams } = new URL(request.url)

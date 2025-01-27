@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import mongoose from 'mongoose'
 
 const Contact = mongoose.models.Contact
@@ -7,7 +7,7 @@ const Contact = mongoose.models.Contact
 // GET /api/contact/[id] - Get a single contact message
 export async function GET(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const message = await Contact.findById(params.id)
     if (!message) {
@@ -33,7 +33,7 @@ export async function GET(request, { params }) {
 // PATCH /api/contact/[id] - Mark message as read/unread
 export async function PATCH(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const body = await request.json()
     const message = await Contact.findByIdAndUpdate(
@@ -65,7 +65,7 @@ export async function PATCH(request, { params }) {
 // DELETE /api/contact/[id] - Delete a message
 export async function DELETE(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const message = await Contact.findByIdAndDelete(params.id)
     if (!message) {

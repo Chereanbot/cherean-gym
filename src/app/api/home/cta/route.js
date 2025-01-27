@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import CTA from '@/models/CTA'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Get active CTA
 export async function GET() {
   try {
-    await connectToDB()
+    await connectDB()
     const cta = await CTA.findOne({ isActive: true })
     
     return NextResponse.json({
@@ -26,7 +26,7 @@ export async function GET() {
 // Add new CTA
 export async function POST(request) {
   try {
-    await connectToDB()
+    await connectDB()
     const data = await request.json()
 
     // If setting this CTA as active, deactivate all others

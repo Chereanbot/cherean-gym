@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Notification from '@/models/Notification'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Get notifications with pagination and filtering
 export async function GET(request) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page')) || 1
@@ -56,40 +56,30 @@ export async function GET(request) {
 }
 
 // Create a new notification
-export async function POST(request) {
+export async function POST(req) {
   try {
-    await connectToDB()
+    await connectDB()
+    const data = await req.json()
     
-    const data = await request.json()
-    
-    // Validate required fields
-    if (!data.message) {
-      return NextResponse.json({
-        success: false,
-        error: 'Message is required'
-      }, { status: 400 })
-    }
-
-    // Create notification
+    // Create notification in database
     const notification = await Notification.create({
       message: data.message,
       type: data.type || 'info',
       category: data.category || 'general',
       link: data.link,
       importance: data.importance || 'low',
-      metadata: data.metadata,
-      expiresAt: data.expiresAt
+      metadata: data.metadata || {}
     })
 
-    return NextResponse.json({
-      success: true,
-      data: notification
+    return NextResponse.json({ 
+      success: true, 
+      notification 
     })
   } catch (error) {
-    console.error('Error creating notification:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create notification'
-    }, { status: 500 })
+    console.error('Notification error:', error)
+    return NextResponse.json(
+      { success: false, error: error.message }, 
+      { status: 500 }
+    )
   }
 } 

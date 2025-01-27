@@ -1,4 +1,4 @@
-import { connectToDB } from "@/database";
+import { connectDB } from '@/lib/database';
 import { NextResponse } from "next/server";
 import { rateLimit } from '@/utils/rateLimit';
 import bcrypt from 'bcryptjs';

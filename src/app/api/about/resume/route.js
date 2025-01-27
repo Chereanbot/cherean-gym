@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import About from '@/models/About'
 
 // Get resume
 export async function GET() {
   try {
-    await connectToDB()
+    await connectDB()
     const about = await About.findOne({})
     
     if (!about || !about.resume) {
@@ -31,7 +31,7 @@ export async function GET() {
 // Delete resume
 export async function DELETE() {
   try {
-    await connectToDB()
+    await connectDB()
     const about = await About.findOne({})
     
     if (!about) {

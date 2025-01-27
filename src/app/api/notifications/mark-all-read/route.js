@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Notification from '@/models/Notification'
+
+export const dynamic = 'force-dynamic'
 
 // PUT /api/notifications/mark-all-read - Mark all notifications as read
 export async function PUT() {
   try {
-    await connectToDB()
+    await connectDB()
     
+    // Update all unread notifications
     const result = await Notification.updateMany(
       { read: false },
       { $set: { read: true } }
@@ -14,8 +17,10 @@ export async function PUT() {
 
     return NextResponse.json({
       success: true,
-      message: 'All notifications marked as read',
-      modifiedCount: result.modifiedCount
+      data: {
+        modifiedCount: result.modifiedCount,
+        message: 'All notifications marked as read'
+      }
     })
   } catch (error) {
     console.error('Error marking all notifications as read:', error)

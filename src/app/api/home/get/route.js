@@ -1,4 +1,4 @@
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Home from "@/models/Home";
 import { NextResponse } from "next/server";
 
@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         const homeData = await Home.findOne({}).sort({ createdAt: -1 });
 
         if (homeData) {

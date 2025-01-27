@@ -7,8 +7,9 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaBlog, FaProjectDiagram, FaBriefcase, FaGraduationCap, FaCog, FaList, 
   FaTachometerAlt, FaBars, FaTimes, FaSignOutAlt, FaBell, FaSearch, FaUserCircle,
-  FaChevronDown, FaChevronRight, FaHome, FaUser, FaKey, FaGlobe, FaCheckCircle, FaExclamationTriangle, FaCheck, FaEnvelope, FaInbox, FaStar } from 'react-icons/fa'
+  FaChevronDown, FaChevronRight, FaHome, FaUser, FaKey, FaGlobe, FaCheckCircle, FaExclamationTriangle, FaCheck, FaEnvelope, FaInbox, FaStar, FaRobot } from 'react-icons/fa'
 import Image from 'next/image'
+import HeaderSearch from './HeaderSearch'
 
 export default function AdminLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -50,15 +51,20 @@ export default function AdminLayout({ children }) {
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     try {
+      setIsLoading(true)
       const response = await fetch('/api/notifications/get')
       const data = await response.json()
       
       if (data.success) {
-        setRecentNotifications(data.data)
-        setUnreadCount(data.data.filter(n => !n.read).length)
+        setRecentNotifications(data.data.notifications)
+        setUnreadCount(data.data.unreadCount)
+      } else {
+        console.error('Failed to fetch notifications:', data.error)
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
@@ -202,14 +208,11 @@ export default function AdminLayout({ children }) {
     }
   }
 
-  // Fetch notifications on mount and set up polling
+  // Initial fetch and polling
   useEffect(() => {
     fetchNotifications()
-    
-    // Poll for new notifications every minute
-    const pollInterval = setInterval(fetchNotifications, 60000)
-    
-    return () => clearInterval(pollInterval)
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
   }, [fetchNotifications])
 
   const notificationsRef = useRef(null)
@@ -344,6 +347,11 @@ export default function AdminLayout({ children }) {
         { title: 'Unread Messages', path: '/admin/messages?filter=unread' },
         { title: 'All Messages', path: '/admin/messages?filter=all' },
       ]
+    },
+    {
+      title: 'AI Agent',
+      icon: FaRobot,
+      path: '/agent'
     },
     {
       title: 'Settings',
@@ -500,12 +508,7 @@ export default function AdminLayout({ children }) {
                 </button>
                 {/* Search bar - Hidden on mobile */}
                 <div className="relative hidden md:block">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-64 pl-10 pr-4 py-2 rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                  />
-                  <FaSearch className="absolute left-3 top-3 text-slate-400" />
+                  <HeaderSearch />
                 </div>
               </div>
 
@@ -581,7 +584,11 @@ export default function AdminLayout({ children }) {
                               <div>
                                 <h3 className="font-semibold text-slate-800">Notifications</h3>
                                 <p className="text-xs text-slate-500">
-                                  {recentNotifications.filter(n => !n.read).length} unread notifications
+                                  {isLoading ? (
+                                    'Loading...'
+                                  ) : (
+                                    `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`
+                                  )}
                                 </p>
                               </div>
                             </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import DashboardMetrics from '@/models/DashboardMetrics';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ const METRICS_HISTORY_LIMIT = 60; // 1 hour of minute-by-minute data
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
 
         // Get the latest metrics
         const latestMetrics = await DashboardMetrics.findOne()
@@ -148,7 +148,7 @@ export async function GET() {
 
 export async function POST(request) {
     try {
-        await connectToDB();
+        await connectDB();
         const data = await request.json();
 
         // Validate the incoming metrics data

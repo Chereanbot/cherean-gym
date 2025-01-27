@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Project from "@/models/Project";
 
 export const dynamic = "force-dynamic";
 
 export async function DELETE(req, { params }) {
     try {
-        const connected = await connectToDB();
+        const connected = await connectDB();
         if (!connected) {
             return NextResponse.json({
                 success: false,

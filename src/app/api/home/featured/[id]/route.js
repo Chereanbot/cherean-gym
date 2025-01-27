@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Featured from '@/models/Featured'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Get single featured project
 export async function GET(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const featured = await Featured.findById(params.id)
     
     if (!featured) {
@@ -33,7 +33,7 @@ export async function GET(request, { params }) {
 // Update featured project
 export async function PUT(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const data = await request.json()
 
     const featured = await Featured.findByIdAndUpdate(
@@ -66,7 +66,7 @@ export async function PUT(request, { params }) {
 // Delete featured project
 export async function DELETE(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const featured = await Featured.findByIdAndDelete(params.id)
 
     if (!featured) {

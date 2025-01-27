@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import Review from '@/models/Review';
 
 // Get a single review
 export async function GET(request, { params }) {
     try {
-        await connectToDB();
+        await connectDB();
         
         const review = await Review.findById(params.id);
         
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
 // Update a review
 export async function PUT(request, { params }) {
     try {
-        await connectToDB();
+        await connectDB();
         
         const body = await request.json();
         
@@ -71,7 +71,7 @@ export async function PUT(request, { params }) {
 // Delete a review
 export async function DELETE(request, { params }) {
     try {
-        await connectToDB();
+        await connectDB();
         
         const review = await Review.findByIdAndDelete(params.id);
         

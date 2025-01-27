@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Home from "@/models/Home";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         
         const homeData = await Home.findOne({}).sort({ createdAt: -1 });
         

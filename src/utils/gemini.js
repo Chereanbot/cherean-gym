@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { notifyAIError, notifyAIQuota } from './notifications'
 
 // Initialize Gemini with API key validation
 const initializeGemini = () => {
@@ -18,6 +19,143 @@ const getGeminiInstance = () => {
         throw error;
     }
 };
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+
+// Initialize Gemini model
+const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+const visionModel = genAI.getGenerativeModel({ model: 'gemini-pro-vision' })
+
+// Chat functionality
+export async function startGeminiChat() {
+  try {
+    const chat = model.startChat({
+      history: [],
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+      },
+    })
+    return chat
+  } catch (error) {
+    await notifyAIError(error, 'chat initialization')
+    throw error
+  }
+}
+
+export async function geminiChat(chat, message) {
+  try {
+    const result = await chat.sendMessage(message)
+    const response = await result.response
+    return response.text()
+  } catch (error) {
+    await notifyAIError(error, 'chat message')
+    throw error
+  }
+}
+
+// Image generation and analysis
+export async function geminiAnalyzeImage(imageUrl, prompt) {
+  try {
+    const result = await visionModel.generateContent([imageUrl, prompt])
+    const response = await result.response
+    return response.text()
+  } catch (error) {
+    await notifyAIError(error, 'image analysis')
+    throw error
+  }
+}
+
+// Content generation
+export async function geminiGenerateContent(prompt, type) {
+  try {
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    return response.text()
+  } catch (error) {
+    await notifyAIError(error, `${type} generation`)
+    throw error
+  }
+}
+
+// Code generation
+export async function geminiGenerateCode(prompt, language) {
+  try {
+    const formattedPrompt = `Generate ${language} code for: ${prompt}\nProvide only the code without explanations.`
+    const result = await model.generateContent(formattedPrompt)
+    const response = await result.response
+    return response.text()
+  } catch (error) {
+    await notifyAIError(error, 'code generation')
+    throw error
+  }
+}
+
+// Content moderation
+export async function geminiModerateContent(content) {
+  try {
+    const prompt = `
+      Analyze the following content for inappropriate or harmful content.
+      Content: ${content}
+      Provide a JSON response with the following structure:
+      {
+        "approved": boolean,
+        "flags": [string],
+        "reason": string
+      }
+    `
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    return JSON.parse(response.text())
+  } catch (error) {
+    await notifyAIError(error, 'content moderation')
+    throw error
+  }
+}
+
+// SEO analysis
+export async function geminiAnalyzeSEO(page) {
+  try {
+    const prompt = `
+      Analyze the following page for SEO improvements:
+      Title: ${page.title}
+      Description: ${page.description}
+      Content: ${page.content}
+      
+      Provide a JSON response with the following structure:
+      {
+        "issues": [
+          {
+            "type": string,
+            "severity": "low" | "medium" | "high",
+            "description": string,
+            "suggestion": string
+          }
+        ]
+      }
+    `
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    return JSON.parse(response.text())
+  } catch (error) {
+    await notifyAIError(error, 'SEO analysis')
+    throw error
+  }
+}
+
+// Quota monitoring
+export async function checkGeminiQuota() {
+  try {
+    const quota = await getGeminiQuota() // Implement this based on your quota tracking
+    await notifyAIQuota(quota.remaining, quota.limit)
+    return quota
+  } catch (error) {
+    await notifyAIError(error, 'quota check')
+    throw error
+  }
+}
 
 export async function analyzeProjectUrl(url) {
     try {

@@ -1,4 +1,4 @@
-import { connectToDB } from "@/database"
+import { connectDB } from '@/lib/database'
 import User from "@/models/User"
 import { hash } from "bcryptjs"
 import { NextResponse } from "next/server"
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 
 export async function POST(req) {
     try {
-        await connectToDB()
+        await connectDB()
         const { username, email, password } = await req.json()
 
         // Only allow registration of the specific admin user

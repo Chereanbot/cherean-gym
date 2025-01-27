@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Project from "@/models/Project";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         
         const projectData = await Project.find({})
             .sort({ createdAt: -1 }) // Get all projects, sorted by newest first

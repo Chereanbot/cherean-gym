@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Featured from '@/models/Featured'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Get all featured projects
 export async function GET() {
   try {
-    await connectToDB()
+    await connectDB()
     const featured = await Featured.find({ isActive: true }).sort({ order: 1 })
     
     return NextResponse.json({
@@ -26,7 +26,7 @@ export async function GET() {
 // Add new featured project
 export async function POST(request) {
   try {
-    await connectToDB()
+    await connectDB()
     const data = await request.json()
 
     // Get highest order number

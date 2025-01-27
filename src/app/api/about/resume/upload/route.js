@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import About from '@/models/About'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -12,7 +12,7 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    await connectToDB()
+    await connectDB()
 
     const formData = await request.formData()
     const file = formData.get('resume')

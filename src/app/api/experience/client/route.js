@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Experience from "@/models/Experience";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         
         const experienceData = await Experience.find({})
             .sort({ createdAt: -1 }); // Get all experiences, sorted by newest first

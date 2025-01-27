@@ -1,4 +1,4 @@
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import { Analytics } from '@/models/Analytics';
 import { headers } from 'next/headers';
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         // Try to connect to the database
-        const isConnected = await connectToDB();
+        const isConnected = await connectDB();
         if (!isConnected) {
             console.error('Failed to connect to database');
             return Response.json(

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import Settings from '@/models/Settings';
 import DashboardSettings from "@/models/DashboardSettings";
 
@@ -20,7 +20,7 @@ const authenticateAdmin = async (req) => {
 export async function GET(req) {
   try {
     await authenticateAdmin(req);
-    await connectToDB();
+    await connectDB();
 
     // Get or create settings
     let settings = await Settings.findOne({});
@@ -108,7 +108,7 @@ export async function GET(req) {
 export async function PUT(req) {
   try {
     await authenticateAdmin(req);
-    await connectToDB();
+    await connectDB();
     
     const updates = await req.json();
 
@@ -141,7 +141,7 @@ export async function PUT(req) {
 export async function POST(req) {
   try {
     await authenticateAdmin(req);
-    await connectToDB();
+    await connectDB();
 
     // Get or create settings
     let settings = await Settings.findOne({});
@@ -172,7 +172,7 @@ export const dynamic = 'force-dynamic';
 // Get current settings
 export async function GET_DASHBOARD() {
     try {
-        await connectToDB();
+        await connectDB();
         
         let settings = await DashboardSettings.findOne();
         if (!settings) {
@@ -198,7 +198,7 @@ export async function GET_DASHBOARD() {
 // Update settings
 export async function PUT_DASHBOARD(request) {
     try {
-        await connectToDB();
+        await connectDB();
         
         const updates = await request.json();
         

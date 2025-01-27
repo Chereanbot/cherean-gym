@@ -1,4 +1,4 @@
-import { connectToDB } from "@/database"
+import { connectDB } from "@/lib/database"
 import Contact from "@/models/Contact"
 import { NextResponse } from "next/server"
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export async function DELETE(req) {
     try {
-        await connectToDB()
+        await connectDB()
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')
 
@@ -31,10 +31,10 @@ export async function DELETE(req) {
             })
         }
     } catch (error) {
-        console.error("Error in contact/delete:", error)
+        console.error("Delete contact error:", error)
         return NextResponse.json({
             success: false,
-            message: "Error deleting message"
-        })
+            message: "Failed to delete contact"
+        }, { status: 500 })
     }
 } 

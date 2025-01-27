@@ -1,4 +1,4 @@
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Project from "@/models/Project";
 import { NextResponse } from "next/server";
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req) {
     try {
-        await connectToDB();
+        await connectDB();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
 

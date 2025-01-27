@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Notification from '@/models/Notification'
 
 // GET /api/notifications/[id] - Get a single notification
 export async function GET(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const notification = await Notification.findById(params.id)
     if (!notification) {
@@ -31,7 +31,7 @@ export async function GET(request, { params }) {
 // DELETE /api/notifications/[id] - Delete a notification
 export async function DELETE(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const notification = await Notification.findByIdAndDelete(params.id)
     if (!notification) {
@@ -57,7 +57,7 @@ export async function DELETE(request, { params }) {
 // PATCH /api/notifications/[id] - Update a notification
 export async function PATCH(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const body = await request.json()
     const notification = await Notification.findByIdAndUpdate(

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import About from '@/models/About';
 
 export async function PUT(req) {
     try {
-        await connectToDB();
+        await connectDB();
         const data = await req.json();
 
         // Find the existing about document or create a new one
@@ -35,7 +35,7 @@ export async function PUT(req) {
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         const about = await About.findOne();
         
         return NextResponse.json({

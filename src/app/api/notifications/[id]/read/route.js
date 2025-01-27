@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Notification from '@/models/Notification'
 
 // PUT /api/notifications/[id]/read - Mark a notification as read
 export async function PUT(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const notification = await Notification.findByIdAndUpdate(
       params.id,

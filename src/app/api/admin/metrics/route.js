@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/database";
+import { connectDB } from '@/lib/database';
 import DashboardMetrics from "@/models/DashboardMetrics";
 
 export const dynamic = 'force-dynamic';

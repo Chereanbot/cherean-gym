@@ -4,32 +4,32 @@ import { soundManager } from './sounds';
 export async function createNotification({
     message,
     type = 'info',
-    category = 'general',
-    link,
+    category = 'system',
+    link = null,
     importance = 'low',
-    metadata = {},
-    expiresAt,
-    playSound = true
+    metadata = {}
 }) {
     try {
-        const notification = await Notification.create({
-            message,
-            type,
-            category,
-            link,
-            importance,
-            metadata,
-            expiresAt
+        const response = await fetch('/api/notifications/realtime', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message,
+                type,
+                category,
+                link,
+                importance,
+                metadata
+            })
         });
 
-        if (playSound) {
-            soundManager.playNotificationSound(type);
-        }
-
-        return notification;
+        const data = await response.json();
+        return data.success;
     } catch (error) {
         console.error('Error creating notification:', error);
-        throw error;
+        return false;
     }
 }
 
@@ -56,13 +56,12 @@ export async function notifyBlogPublished(blog) {
     });
 }
 
-export async function notifyBlogCommented(blog, comment) {
+export async function notifyBlogComment(blog, comment) {
     return createNotification({
-        message: `New comment on "${blog.title}" from ${comment.author}`,
+        message: `New comment on "${blog.title}"`,
         type: 'info',
         category: 'blog',
-        link: `/blog/${blog.slug}#comment-${comment._id}`,
-        importance: 'low',
+        link: `/blog/${blog.slug}#comments`,
         metadata: { blogId: blog._id, commentId: comment._id }
     });
 }
@@ -89,25 +88,14 @@ export async function notifyProjectUpdated(project) {
     });
 }
 
-export async function notifyProjectStatusChanged(project, oldStatus, newStatus) {
-    return createNotification({
-        message: `Project "${project.name}" status changed from ${oldStatus} to ${newStatus}`,
-        type: 'info',
-        category: 'project',
-        link: `/projects/${project.slug}`,
-        importance: 'medium',
-        metadata: { projectId: project._id, oldStatus, newStatus }
-    });
-}
-
 // Message related notifications
 export async function notifyNewMessage(message) {
     return createNotification({
         message: `New message from ${message.name}`,
-        type: 'message',
-        category: 'general',
-        link: '/admin/messages',
+        type: 'info',
+        category: 'message',
         importance: 'high',
+        link: '/admin/messages',
         metadata: { messageId: message._id }
     });
 }
@@ -127,9 +115,9 @@ export async function notifyUrgentMessage(message) {
 export async function notifySystemUpdate(message, importance = 'medium') {
     return createNotification({
         message,
-        type: 'info',
+        type: 'warning',
         category: 'system',
-        importance
+        importance: importance || 'high'
     });
 }
 
@@ -143,67 +131,91 @@ export async function notifySystemMaintenance(startTime, duration) {
     });
 }
 
-export async function notifyBackupComplete(status, details) {
-    return createNotification({
-        message: `System backup ${status}: ${details}`,
-        type: status === 'completed' ? 'success' : 'error',
-        category: 'system',
-        importance: 'medium',
-        metadata: { status, details }
-    });
-}
-
 // Error notifications
-export async function notifyError(error, context) {
+export async function notifyError(error, context = '') {
+    const errorMessage = context 
+        ? `Error in ${context}: ${error.message}`
+        : `Error: ${error.message}`;
+        
     return createNotification({
-        message: `Error in ${context}: ${error.message}`,
+        message: errorMessage,
         type: 'error',
         category: 'system',
         importance: 'high',
-        metadata: { error: error.message, stack: error.stack }
+        metadata: { 
+            error: error.message, 
+            stack: error.stack,
+            context 
+        }
     });
 }
 
 // Security notifications
-export async function notifyLoginAttempt(success, username, ipAddress) {
+export async function notifyLoginAttempt(success, info) {
+    const username = info.username || 'Unknown';
+    const ipAddress = info.ip || 'Unknown IP';
+    
     return createNotification({
-        message: `${success ? 'Successful' : 'Failed'} login attempt for ${username} from ${ipAddress}`,
+        message: success 
+            ? `Successful login from ${ipAddress} (${username})`
+            : `Failed login attempt for ${username} from ${ipAddress}`,
         type: success ? 'success' : 'warning',
         category: 'auth',
         importance: success ? 'low' : 'high',
-        metadata: { username, ipAddress }
+        metadata: { ...info, success }
     });
 }
 
-export async function notifySecurityAlert(message, details) {
+// AI-Related Notifications
+export async function notifyAICompletion(prompt, type) {
     return createNotification({
-        message,
+        message: `AI ${type} generation completed`,
+        type: 'success',
+        category: 'ai',
+        importance: 'medium',
+        metadata: { prompt, type }
+    });
+}
+
+export async function notifyAIError(error, type) {
+    return createNotification({
+        message: `AI ${type} generation failed: ${error.message}`,
         type: 'error',
-        category: 'auth',
+        category: 'ai',
         importance: 'high',
-        metadata: details
+        metadata: { error: error.toString(), type }
     });
 }
 
-// Performance notifications
-export async function notifyPerformanceIssue(metric, value, threshold) {
+export async function notifyAIQuota(remaining, limit) {
+    const percentage = (remaining / limit) * 100;
     return createNotification({
-        message: `Performance alert: ${metric} (${value}) exceeded threshold (${threshold})`,
-        type: 'warning',
-        category: 'system',
-        importance: 'high',
+        message: `AI API quota at ${percentage}% (${remaining}/${limit} requests remaining)`,
+        type: percentage < 20 ? 'warning' : 'info',
+        category: 'ai',
+        importance: percentage < 20 ? 'high' : 'medium',
+        metadata: { remaining, limit, percentage }
+    });
+}
+
+// Analytics Notifications
+export async function notifyAnalyticsThreshold(metric, value, threshold) {
+    return createNotification({
+        message: `${metric} reached ${value} (threshold: ${threshold})`,
+        type: 'info',
+        category: 'analytics',
+        importance: 'medium',
         metadata: { metric, value, threshold }
     });
 }
 
-// Reminder notifications
-export async function notifyReminder(message, dueDate) {
+export async function notifyTrafficSpike(current, average) {
+    const increase = ((current - average) / average) * 100;
     return createNotification({
-        message,
-        type: 'reminder',
-        category: 'general',
-        importance: 'medium',
-        metadata: { dueDate },
-        expiresAt: new Date(dueDate)
+        message: `Traffic spike detected: ${increase.toFixed(1)}% increase`,
+        type: 'warning',
+        category: 'analytics',
+        importance: 'high',
+        metadata: { current, average, increase }
     });
-} 
+}

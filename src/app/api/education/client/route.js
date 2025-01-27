@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Education from "@/models/Education";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
         
         const educationData = await Education.find({})
             .sort({ year: -1 }); // Get all education entries, sorted by year in descending order

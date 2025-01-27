@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import Blog from '@/models/Blog'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    await connectToDB()
+    await connectDB()
 
     const [total, published, draft] = await Promise.all([
       Blog.countDocuments(),

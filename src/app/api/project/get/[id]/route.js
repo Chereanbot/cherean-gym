@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import Project from '@/models/Project';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
     try {
-        await connectToDB();
+        await connectDB();
         const { id } = params;
 
         if (!id) {

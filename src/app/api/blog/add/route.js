@@ -1,10 +1,10 @@
-import connectToDB from "@/database"
+import { connectDB } from '@/lib/database'
 import Blog from "@/models/Blog"
 import { NextResponse } from "next/server"
 
 export const POST = async (request) => {
     try {
-        await connectToDB();
+        await connectDB();
         const blogData = await request.json();
 
         // Validate required fields

@@ -1,4 +1,4 @@
-import connectToDB from "@/database"
+import { connectDB } from '@/lib/database'
 import Service from "@/models/Service"
 import { NextResponse } from "next/server"
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-    await connectToDB()
+    await connectDB()
     const services = await Service.find({}).sort({ order: 1 })
 
     if (services) {

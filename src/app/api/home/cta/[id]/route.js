@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import CTA from '@/models/CTA'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Get single CTA
 export async function GET(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const cta = await CTA.findById(params.id)
     
     if (!cta) {
@@ -33,7 +33,7 @@ export async function GET(request, { params }) {
 // Update CTA
 export async function PUT(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const data = await request.json()
 
     // If setting this CTA as active, deactivate all others
@@ -74,7 +74,7 @@ export async function PUT(request, { params }) {
 // Delete CTA
 export async function DELETE(request, { params }) {
   try {
-    await connectToDB()
+    await connectDB()
     const cta = await CTA.findByIdAndDelete(params.id)
 
     if (!cta) {

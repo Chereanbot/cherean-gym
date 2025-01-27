@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import About from '@/models/About'
 import PDFDocument from 'pdfkit'
 import { v2 as cloudinary } from 'cloudinary'
@@ -53,7 +53,7 @@ export async function POST(request) {
     })
 
     // Update About document
-    await connectToDB()
+    await connectDB()
     let about = await About.findOne({})
     if (!about) {
       about = new About({})

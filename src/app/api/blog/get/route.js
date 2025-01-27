@@ -1,10 +1,10 @@
-import connectToDB from "@/database"
+import { connectDB } from '@/lib/database'
 import Blog from "@/models/Blog"
 import { NextResponse } from "next/server"
 
 export const GET = async () => {
     try {
-        await connectToDB();
+        await connectDB();
         const blogs = await Blog.find({}).sort({ createdAt: -1 });
 
         if (blogs) {

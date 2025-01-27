@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import connectToDB from '@/database'
+import { connectDB } from '@/lib/database'
 import { createContactNotification } from '@/utils/notificationHelpers'
 
 // Create Contact Message Schema if you don't have one
@@ -37,7 +37,7 @@ const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSche
 // POST /api/contact - Handle contact form submission
 export async function POST(request) {
   try {
-    await connectToDB()
+    await connectDB()
     
     const body = await request.json()
     const { name, email, subject, message } = body

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import connectDB from "@/database";
+import { connectDB } from '@/lib/database';
 import DashboardActivity from "@/models/DashboardActivity";
 
 export const dynamic = 'force-dynamic';

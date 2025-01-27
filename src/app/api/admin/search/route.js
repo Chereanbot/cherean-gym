@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Blog from "@/models/Blog";
 import Project from "@/models/Project";
 import Service from "@/models/Service";
@@ -20,7 +20,7 @@ export async function GET(request) {
             });
         }
 
-        await connectToDB();
+        await connectDB();
 
         let results = [];
         const searchRegex = new RegExp(query, 'i');
@@ -114,7 +114,7 @@ export async function GET(request) {
 // Save recent search
 export async function POST(request) {
     try {
-        await connectToDB();
+        await connectDB();
         const { query, type } = await request.json();
 
         // Here you could implement saving recent searches to user preferences

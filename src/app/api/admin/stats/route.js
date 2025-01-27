@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import Blog from "@/models/Blog";
 import Project from "@/models/Project";
 import Service from "@/models/Service";
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        await connectToDB();
+        await connectDB();
 
         // Get counts and status from all collections
         const [

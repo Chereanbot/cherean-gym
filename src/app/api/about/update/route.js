@@ -1,4 +1,4 @@
-import connectToDB from "@/database";
+import { connectDB } from '@/lib/database';
 import About from "@/models/About"; 
 import { NextResponse } from "next/server";
 
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export async function PUT(req) {
     try {
-        await connectToDB();
+        await connectDB();
         const extractData = await req.json();
         const { _id,aboutme,noofprojects,yearofexerience,noofclients,skills } = extractData;
 

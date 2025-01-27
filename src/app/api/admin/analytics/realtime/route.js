@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import connectToDB from '@/database';
+import { connectDB } from '@/lib/database';
 import { Analytics } from '@/models/Analytics';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export async function GET() {
     };
 
     try {
-        await connectToDB();
+        await connectDB();
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
