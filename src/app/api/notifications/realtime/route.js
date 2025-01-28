@@ -6,8 +6,11 @@ import Notification from '@/models/Notification'
 let wss = null
 
 // Initialize WebSocket server
-if (!wss) {
-  wss = new WebSocketServer({ noServer: true })
+if (!wss && typeof window === 'undefined') {
+  wss = new WebSocketServer({ 
+    noServer: true,
+    path: '/api/notifications/realtime'
+  })
   
   wss.on('connection', (ws) => {
     console.log('Client connected')
@@ -30,14 +33,23 @@ export const broadcastNotification = (notification) => {
 }
 
 // Handle WebSocket upgrade
-export function GET(req) {
-  if (req.headers.upgrade !== 'websocket') {
+export async function GET(req) {
+  if (!req.headers.get('upgrade')?.toLowerCase() === 'websocket') {
     return new Response('Expected Upgrade: websocket', { status: 426 })
   }
 
-  wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
-    wss.emit('connection', ws, req)
-  })
+  try {
+    const { socket, response } = Deno.upgradeWebSocket(req)
+    
+    wss.handleUpgrade(req, socket, Buffer.alloc(0), (ws) => {
+      wss.emit('connection', ws, req)
+    })
+
+    return response
+  } catch (err) {
+    console.error('WebSocket upgrade failed:', err)
+    return new Response('WebSocket upgrade failed', { status: 500 })
+  }
 }
 
 // Create a new notification and broadcast it
