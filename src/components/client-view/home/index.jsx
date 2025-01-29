@@ -11,6 +11,12 @@ import portfolio2 from "../../../assets/portfolio2.png"
 import portfolio3 from "../../../assets/portfolio3.png"
 import { getData } from "@/services"
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import RotatingCorners from './RotatingCorners'
+
+const TechStack = dynamic(() => import('./TechStack'), {
+  ssr: false
+})
 
 function variants() {
   return {
@@ -542,6 +548,51 @@ export default function ClientHomeView() {
           <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-green-main opacity-5 rounded-full filter blur-3xl"></div>
         </div>
       </div>
+
+      {/* Hero Section with Rotating Corners */}
+      <section className="relative min-h-screen flex items-center justify-center p-8">
+        <RotatingCorners 
+          size="w-24 h-24"
+          duration={25}
+          borderColor="border-green-500"
+          borderWidth="border-4"
+          className="opacity-50"
+        />
+        
+        <div className="relative z-10 text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-6xl font-bold mb-6"
+          >
+            Full Stack Developer
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8"
+          >
+            Building modern web applications with cutting-edge technologies
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <a
+              href="#contact"
+              className="bg-green-500 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-600 transition-colors"
+            >
+              Get in Touch
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Tech Stack Section */}
+      <TechStack />
     </>
   )
 }

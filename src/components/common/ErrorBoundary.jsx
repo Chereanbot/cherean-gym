@@ -1,6 +1,8 @@
-import React from 'react';
+'use client';
 
-class ErrorBoundary extends React.Component {
+import { Component } from 'react';
+
+class ErrorBoundary extends Component {
     constructor(props) {
         super(props);
         this.state = { hasError: false };
@@ -11,25 +13,19 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        // You can log the error to an error reporting service here
-        console.error('Error caught by boundary:', error, errorInfo);
+        console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
     render() {
         if (this.state.hasError) {
-            return (
-                <div className="text-center p-8">
-                    <h2 className="text-2xl font-bold text-red-600">
-                        {this.props.fallbackText || 'Something went wrong.'}
-                    </h2>
-                    <button 
-                        onClick={() => {
-                            this.setState({ hasError: false });
-                            window.location.reload();
-                        }} 
-                        className="mt-4 px-4 py-2 bg-green-main text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
+            return this.props.fallback || (
+                <div className="p-4 text-center">
+                    <h2 className="text-red-500 font-semibold">Something went wrong.</h2>
+                    <button
+                        onClick={() => this.setState({ hasError: false })}
+                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
-                        Try Again
+                        Try again
                     </button>
                 </div>
             );
